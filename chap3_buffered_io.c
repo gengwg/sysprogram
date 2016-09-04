@@ -83,4 +83,59 @@ int main(void) {
     }
 
     /* write binary data use fwrite() */
+
+    /* Seeking a Stream 
+
+       int fskeek (FILE *stream, long offset, int whence);
+
+       whence --> SEEK_SET, file position --> offset;
+       whence --> SEEK_CUR, file position --> current pos + offset;
+       whence --> SEEK_END, file position --> EOF + offset;
+
+       void rewind ((FILE *stream);
+
+       The invocation
+            rewind (stream);
+       resets the position back to the start of the stream.
+       equivalent to:
+            fseek (stream, 0, SEEK_SET);
+
+
+       The ftell() function returns the current stream position of stream
+
+       long ftell (FILE *stream);
+
+     */
+
+    /* to obtain the file descriptor backing a stream, use fileno() 
+
+       int fileno (FILE *stream);
+     */
+    
+    
+    stream = fopen ("/tmp/treasures.txt", "w");
+
+    if (!stream) {
+        perror("fopen2");
+        return -1;
+    }
+
+    /* ensure the lines are written w/o interleaving write operations 
+       from other threads */
+    flockfile (stream);
+    fputs ("list of treasures:\n", stream);
+    fputs ("    (1) 500 gold coins\n", stream);
+    fputs ("    (2) Wonderfully ornate dishware\n", stream);
+    funlockfile (stream);
+    /* ideally, an application is designed such that multiple threads are not 
+       submittting io to the same stream. if your app does need to do so, 
+       you need an atomic region greater than a single functin, flock can save
+       the day. */
+
+    if (fclose (stream) == EOF) {
+        perror("fclose");
+        return -1;
+    }
+
+
 }
