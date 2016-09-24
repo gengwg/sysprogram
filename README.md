@@ -80,4 +80,4 @@ they are stored in a stack, and LIFO.
 
 Registered functions must not call exit() lest they begin an endless recursion.
 
-[Example]:(chap5_atexit.c "atexit").
+[Example](chap5_get_pid.c "atexit").
