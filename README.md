@@ -80,4 +80,9 @@ they are stored in a stack, and LIFO.
 
 Registered functions must not call exit() lest they begin an endless recursion.
 
-[Example](chap5_get_pid.c "atexit").
+Here is an [Example](chap5_get_pid.c "atexit").
+
+When a process terminates, the kernel sends the signal SIGCHLD to the parent.
+By default, this signal is ignored, and no action is taken by the parent.
+Processes and elect to handle this signal via signal() or sigaction() system calls.
+
