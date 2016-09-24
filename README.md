@@ -1,7 +1,9 @@
 # sysprogram
 system programing
 
-## Terminating a program
+## Chapter 5
+
+### Terminating a Process
 
 ```
 #include <stdlib.h>
@@ -40,4 +42,42 @@ when process exits, the kernel cleans up all of the resources that it created on
 that are no longer in use. includes, allocated memory, open files, and system V semaphores.
 after cleanup, the kenerl destroys the process and notifies the parent of its child's demise.
 
+### Other ways to terminate
 
+"Falling off the end". in the case of C/C++, this happens when the main() function returns. "Falling off the end"
+approach still invokes a system call: the compiler simply inserts and implicit call to `exit()`
+after its own shutdown code. it's good coding practice to explicitly return an exit status,
+either via exit(),  or by reutrning a vlaue from main().
+note that a successful return is exit(0), or a return from main() of 0.
+
+a process and also terminate if it is sent a signal whose default action is to terminate the process.
+such includes SIGTERM and SIGKILL.
+
+final way to end a program's execution is by incurrng the wrath of the kernel. 
+the kernel can kill a process for executing an illegal instruction, causing a segmentation violation, running out of memory, consuming moreresources that allowed, and so on.
+
+### atexit()
+
+```
+#include <stdlib.h>
+
+int atexit (void (*function)(void));
+```
+
+registers the given function to run during normal process termination, 
+i.e. when a process is terminated via either exit() or a return from main().
+
+if a process invokes an exec funtion, the list of registered functions is cleared 
+(as the functions no longer exist in the new process's address space).
+if a process terminates via a signal, the registered functions are not called.
+
+the given function takes no parameters and returns no value.
+    
+    void my_function (void);
+
+functions are invoked in the reverse order that they are registered. 
+they are stored in a stack, and LIFO.
+
+Registered functions must not call exit() lest they begin an endless recursion.
+
+[Example]:(chap5_atexit.c "atexit").
