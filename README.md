@@ -86,3 +86,69 @@ When a process terminates, the kernel sends the signal SIGCHLD to the parent.
 By default, this signal is ignored, and no action is taken by the parent.
 Processes and elect to handle this signal via signal() or sigaction() system calls.
 
+### Wait for terminated child processes
+
+when a child dies before its parent, kernel should put the child into a special process state, zombie. only some basic kernel data structures containing potentially useful data is retained. a process in this state waits for its parent to inquire about its status. only after the parent obtains the informatin preserved about the terminated child does the process formally exit and cease to exist even as a zombie.
+
+if your application forks a child process, it is your responsiblitiy to wait on the child, even if it will merely discard the info gleaned. otherwise, all of your process's children will become ghosts and live on, crowding the system's process listing.
+
+whenever a process terminates, the kernel walks a list of its children and reparents all of them to the init process with pid value 1. the init process periodically waits on all of its children, ensuring none remain zombies for too long.
+
+There are 4 user IDs associated with a process:
+real, effective, saved, and filesystem.
+
+1. the real user ID is hte uid of the user who originally ran the process. 
+normally the login process sets the realy user ID of the user's login shell to that of hte user, and all of the user's process continue to carry this user ID.
+
+2. the effective user ID is the user ID that the process is currently wielding.
+Permission verifications normally check against this value. 
+by executing a setuid binary, the process can change its effective user id.
+the effective id is set to the user id of hte owner of the program file.
+
+3. the saved user id is hte process's original effective user ID.
+
+### Sessions and process groups
+
+the process group id is equal to the pid of the process group leader.
+
+a session is a collection of one or more process groups. sessions arrange a logged-in user's activities nad associate that user wiht a controlling terminal.
+sessions are largely the business of shells.
+
+sessions exist to consolidate logins around contorlling terminals.
+process groups in a session are divided into a single foreground process group and zero or more backgroud process groups..
+when a user exits a terminal, a SIGQUIT is sent to all processes in the foreground processs group.
+when a network disconnect is detected by a terminal, a SIGHUP is sent to all processes in the foreground processs group.
+when the interrupt key (Ctrl+C), a SIGINT is sent to all processses in the foreground processs group.
+sessions make managing terminals and logins easier for shells.
+
+on a given system, there are many sessions: one for each user login and others for processes not tied to user logins, such as daemons. daemons tend to create their own sessions to avoid the issues of assocation with other sessions that may exit.
+
+the easiest way to ensure that any given process is not a process group leader is to fork, have the parent terminate, and have the child preform the setsid().
+
+Here is an [Example](chap5_setsid_getsid.c "session system calls").
+
+### Daemons
+
+a daemon is a process that runs in the background, not connecting to any controlling terminal. daemons are normally started at boot time, run as root
+or some other special user (apache, postfix), and handle system-level tasks.
+
+a daemon has two general requirements: it must run as a child of init nad it must not be connected to a terminal.
+
+a program performas following steps to become a daemon:
+
+1. call fork(). this creates the new process which will become the daemon.
+
+2. in the parent, call exit(). this ensures that the orignal parent is no longer runing.
+
+3. call setsid(), givine the daemon a new process group and session, both of which have it as leader.
+
+4. change working directory to the root dir via chdir(). the inherited working dir can be anywhere on the filesystem.
+
+5. close all file descritors. same inherit above.
+
+6. open file descriptors 0, 1, and 2. and redirect them to /dev/null.
+
+Here is an [Example](chap5_daemonize.c "Daemons").
+
+
+
