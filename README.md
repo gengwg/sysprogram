@@ -151,4 +151,40 @@ a program performas following steps to become a daemon:
 Here is an [Example](chap5_daemonize.c "Daemons").
 
 
+## Chapter 6 - Advanced Process Management
+
+### The Completely Fair Scheduler
+
+A runnable process is one that is not blocked; a blocked process is one that is sleeping, waiting for I/O from the kernel.
+
+Deciding which processes run, when, and for how long is the process scheduler’s fundamental responsibility.
+
+Multitasking operating systems come in two variants: cooperative and preemptive. Linux
+implements the latter form of multitasking, where the scheduler decides when one pro‐
+cess is to stop running and a different process is to resume. We call the act of suspending
+a running process in lieu of another one preemption. The length of time a process is
+allowed to run before the scheduler preempts it is known as the process's timeslice, so
+called because the scheduler allocates the process a "slice" of the processor's time.
+
+Processes that continually consume all of their available timeslices are considered
+processor-bound. 
+examples include scientific computations, mathematical calculations, and image processing.
+
+processes that spend more time blocked waiting for some resource
+than executing are considered I/O-bound. I/O-bound processes are often issuing and
+waiting for file or network I/O, blocking on keyboard input, or waiting for the user to
+move the mouse. Examples of I/O-bound applications include file utilities that do very
+little except issue system calls asking the kernel to perform I/O, such as cp or mv, and many GUI applications, which spend a great deal of time waiting for user input.
+
+By assigning proportions of the processor and not fixed timeslices, CFS is able to enforce
+fairness: each process gets its fair share of the processor. Moreover, CFS is able to enforce
+a configurable scheduling latency, as the target latency is user-settable. On traditional
+Unix schedulers, processes run for fixed timeslices known a priori, but the scheduling
+latency (how often they run) is unknown. On CFS, processes run for proportions and
+with a latency that is known a priori, but the timeslice is dynamic, a function of the
+number of runnable processes on the system. It is a markedly different way of handling
+process scheduling, solving many of the problems around interactive and I/O-bound
+processes that has plagued traditional process schedulers.
+
+
 
