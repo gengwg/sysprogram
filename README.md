@@ -186,5 +186,14 @@ number of runnable processes on the system. It is a markedly different way of ha
 process scheduling, solving many of the problems around interactive and I/O-bound
 processes that has plagued traditional process schedulers.
 
+### I/O priorities
+
+I/O priorities vs scheduling priority
+
+by default, kernel's I/O scheduler use a process's nice value to dtermine the i/o priority.
+
+glibc does not provide a user-space interface to the i/o priority sys calls.
+use nice value, or a utility such as ionice, part of until-linux package.
+
 
 
