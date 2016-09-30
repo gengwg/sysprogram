@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <errno.h>
 
+#include <sys/time.h>
+#include <sys/resource.h>
+
 int main (void)
 {
     int ret;
@@ -34,6 +37,13 @@ int main (void)
         return -1;
     } else 
         printf ("nice value is now %d\n", ret);
+
+    ret = setpriority (PRIO_PGRP, 0, 11);
+    if (ret == -1)
+        perror ("setpriority");
+
+    ret = getpriority (PRIO_PROCESS, 0);
+    printf ("nice value is %d\n", ret);
 
     return 0;
 
