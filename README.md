@@ -236,3 +236,7 @@ if (ret == -1){
 ```
 
 the result is your RT process runs only on CPU #1, and all other processes run on the other processors.
+
+### Resource limits
+
+The hard limit is the ceiling for the soft limit. The soft limit is what is actually enforced for a session or process. This allows the administrator (or user) to set the hard limit to the maximum usage they wish to allow. Other users and processes can then use the soft limit to self-limit their resource usage to even lower levels if they so desire.
