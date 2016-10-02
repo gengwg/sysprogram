@@ -5,7 +5,7 @@ system programing
 
 ### Terminating a Process
 
-```
+```c
 #include <stdlib.h>
 
 void exit (int status);
@@ -32,7 +32,7 @@ Before terminating the process, the C lib performs the following shutdown steps,
 these steps finish all the work the process need to do in user space, so exit() invokes
 the system call `_exit()` to let the kernel handle the rest of the termination process:
 
-```
+```c
 # include <stdlib.h>
 
 void _exit (int status);
@@ -53,7 +53,7 @@ note that a successful return is exit(0), or a return from main() of 0.
 a process and also terminate if it is sent a signal whose default action is to terminate the process.
 such includes SIGTERM and SIGKILL.
 
-final way to end a program's execution is by incurrng the wrath of the kernel. 
+final way to end a program's execution is by incurrng the wrath of the kernel.
 the kernel can kill a process for executing an illegal instruction, causing a segmentation violation, running out of memory, consuming moreresources that allowed, and so on.
 
 ### atexit()
@@ -64,18 +64,18 @@ the kernel can kill a process for executing an illegal instruction, causing a se
 int atexit (void (*function)(void));
 ```
 
-registers the given function to run during normal process termination, 
+registers the given function to run during normal process termination,
 i.e. when a process is terminated via either exit() or a return from main().
 
-if a process invokes an exec funtion, the list of registered functions is cleared 
+if a process invokes an exec funtion, the list of registered functions is cleared
 (as the functions no longer exist in the new process's address space).
 if a process terminates via a signal, the registered functions are not called.
 
 the given function takes no parameters and returns no value.
-    
+
     void my_function (void);
 
-functions are invoked in the reverse order that they are registered. 
+functions are invoked in the reverse order that they are registered.
 they are stored in a stack, and LIFO.
 
 Registered functions must not call exit() lest they begin an endless recursion.
@@ -97,11 +97,11 @@ whenever a process terminates, the kernel walks a list of its children and repar
 There are 4 user IDs associated with a process:
 real, effective, saved, and filesystem.
 
-1. the real user ID is hte uid of the user who originally ran the process. 
+1. the real user ID is hte uid of the user who originally ran the process.
 normally the login process sets the realy user ID of the user's login shell to that of hte user, and all of the user's process continue to carry this user ID.
 
 2. the effective user ID is the user ID that the process is currently wielding.
-Permission verifications normally check against this value. 
+Permission verifications normally check against this value.
 by executing a setuid binary, the process can change its effective user id.
 the effective id is set to the user id of hte owner of the program file.
 
@@ -167,7 +167,7 @@ allowed to run before the scheduler preempts it is known as the process's timesl
 called because the scheduler allocates the process a "slice" of the processor's time.
 
 Processes that continually consume all of their available timeslices are considered
-processor-bound. 
+processor-bound.
 examples include scientific computations, mathematical calculations, and image processing.
 
 processes that spend more time blocked waiting for some resource
@@ -195,5 +195,44 @@ by default, kernel's I/O scheduler use a process's nice value to dtermine the i/
 glibc does not provide a user-space interface to the i/o priority sys calls.
 use nice value, or a utility such as ionice, part of until-linux package.
 
+### CPU affinity and RT process
 
+This grabs init's current set of allowed processors, which is all of them.
+it then removes one processor, CPU #1, from the set and updates the list of
+allowed processors.
 
+```c
+cpu_set_t set;
+int ret;
+
+CPU_ZERO (&set);  /* clear all CPUs */
+ret = sched_getaffinity (0, sizeof (cpu_set_t), &set);
+if (ret == -1){
+  perror("sched_getaffinity");
+  return 1;
+}
+
+CPU_CLR (1, &set); /* forbid CPU #1 */
+ret = sched_setaffinity (0, sizeof (cpu_set_t), &set);
+
+```
+
+because set of allowed processorsis inherited from parent to child,
+and init is hte super-parent of all processes, all of the system's processes will run with this set of allowed processors.
+
+Next modify the RT process to run only on CPU #1:
+
+```c
+cpu_set_t set;
+int ret;
+
+CPU_ZERO (&set);  /* clear all CPUs */
+CPU_SET (1, &set);  /* allow CPU #1*/
+ret = sched_setaffinity (0, sizeof (cpu_set_t), &set);
+if (ret == -1){
+  perror("sched_setaffinity");
+  return 1;
+}
+```
+
+the result is your RT process runs only on CPU #1, and all other processes run on the other processors.
