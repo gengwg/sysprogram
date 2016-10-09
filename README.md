@@ -240,3 +240,11 @@ the result is your RT process runs only on CPU #1, and all other processes run o
 ### Resource limits
 
 The hard limit is the ceiling for the soft limit. The soft limit is what is actually enforced for a session or process. This allows the administrator (or user) to set the hard limit to the maximum usage they wish to allow. Other users and processes can then use the soft limit to self-limit their resource usage to even lower levels if they so desire.
+
+### Threading models
+
+kernel-level threading, 1:1 threading. kernel provices native support for threads ,and each of those kernel threads translates directly to the user space concept of a thread.
+the linux kernel implements threads simply as processes that share resources. the threading library creates a new thread via the clone() system call, and the returned process is directly managed as the user space concept of a thread.
+
+user-level threading, N:1 threading. a process with N threads will map to a single kernel process.
+this model cannot utilize multiple processors and thus is unable to provide true parallelism.
