@@ -248,3 +248,27 @@ the linux kernel implements threads simply as processes that share resources. th
 
 user-level threading, N:1 threading. a process with N threads will map to a single kernel process.
 this model cannot utilize multiple processors and thus is unable to provide true parallelism.
+
+## Chapter 8 File and Directory Management
+
+Linux currently defines 4 extended attribute namespaces:
+
+* system
+
+the system namespace is used to implement kernel features that utilize extended attributes, such as access control lists ACLs.
+whether a user can read or write to these attributes depends on the security module in place.
+
+* security 
+
+the security namespace is used to implement  security modules, such as SELinux.
+
+* trusted
+
+stores restricted information in userspace. only processes with `CAP_SYS_ADMIN` capability can read or write to these atributes
+
+* user
+
+standard namespace for regular processes. kernel control access to this namespace via the normal file permission bits.
+you can assign xattr in the user name space only to regular files, not to symbolic links or device files.
+designing a user space application that uses xatt, this is it.
+
