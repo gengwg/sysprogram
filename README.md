@@ -272,3 +272,19 @@ standard namespace for regular processes. kernel control access to this namespac
 you can assign xattr in the user name space only to regular files, not to symbolic links or device files.
 designing a user space application that uses xatt, this is it.
 
+## Chapter 11 Time
+
+call sleep() returns the number of seconds _not_ sleep. e.g. a signal interrupts the nap.
+
+if sleeping the entire specified time is a concern, you cna continue callling sleep() with its return value, until it returns 0.
+
+```bash
+    unsigned int s = 5;
+
+    while ((s = sleep (s)))
+        ;
+```
+
+they will sleep _at least as long as requested_.
+
+
